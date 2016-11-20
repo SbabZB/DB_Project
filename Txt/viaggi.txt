@@ -1,0 +1,22 @@
+96	IMO4438756	Gasoline	2015-11-22	2016-12-16	Port of Rotterdam	Port of Genoa
+97	IMO4438756	Gasoline	2016-1-23	2016-02-08	Port of Barcelona	Port of Augusta
+98	IMO4438756	Jet fuel	2016-2-10	2016-02-20	Port of Augusta	Port of Ashdod
+99	IMO4438756	Gasoil	2016-3-15	2016-4-4	Port of Taranto	Port of Tuapse
+100	IMO4438756	Gasoline	2016-4-11	2016-5-6	Port of Izmit	Port of Rotterdam
+101	IMO4438756	Jet fuel	2016-5-10	2016-5-17	Port of Rotterdam	Port of Immingham
+81	IMO4439254	Gasoline	2015-12-10	2016-01-11	Port of Shanghai	Port of Melbourne
+82	IMO4439254	MTBE	2016-02-02	2016-02-22	Port of Taichung	Port of Kobe
+83	IMO4439254	Jet fuel	2016-02-22	2016-03-3	Port of Kobe	Port of Tokyo
+84	IMO4439254	Jet fuel	2016-03-10	2016-03-14	Port of Osaka	Port of Fukuyama
+85	IMO4439254	MTBE	2016-04-2	2016-04-18	Port of Taichung	Port of Busan
+86	IMO4439254	Gasoline	2016-04-29	2016-05-15	Port of Busan	Port of Tokyo
+87	IMO4439254	MTBE	2016-05-31	'NULL'	Port of Shanghai	Port of Tokyo
+38	IMO5641147	Phosphate	2015-11-29	2015-12-30	Port of Taranto	Port of Melbourne
+39	IMO5641147	Bauxite	2016-01-28	2016-3-04	Port of Melbourne	Port of Taranto
+40	IMO5641147	Phosphate	2016-03-14	2016-04-3	Port of Taranto	Port of Odessa
+41	IMO5641147	Coal	2016-04-19	2016-05-9	Port of Odessa	Port of Taranto
+32	IMO5641234	Bauxite	2015-12-02	2015-12-29	Port of Melbourne	Port of Hong Kong
+33	IMO5641234	Coal	2016-01-08	2016-01-23	Port of Hong Kong	Port of Shanghai
+34	IMO5641234	Coal	2016-02-11	2016-03-7	Port of Hong Kong	Port of Melbourne
+35	IMO5641234	Bauxite	2016-03-17	2016-04-16	Port of Melbourne	Port of Osaka
+36	IMO5641234	Grain	2016-05-10	2016-06-17	Port of Shanghai	Port of Melbourne
