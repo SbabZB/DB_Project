@@ -6,7 +6,7 @@ CREATE TABLE Personale
  Data_nascita DATE,
  Cittadinanza VARCHAR(20),
  Qualifica VARCHAR(20),
- Grado VARCHAR(10),
+ Grado VARCHAR(30),
   PRIMARY KEY (Matricola)
 );
 
@@ -40,7 +40,7 @@ CREATE TABLE Navi
   Data_ultima_posizione DATETIME,
   Latitudine_ultima_posizione numeric(8,6),
   Longitudine_ultima_posizione numeric (9,6),
-  Stato_corrente varchar(20),
+  Stato_corrente varchar(40),
   Velocita_attuale numeric(3,1) DEFAULT 0,
   PRIMARY KEY (IMO_number),
   FOREIGN KEY (Classe) REFERENCES Classi(Nome)
@@ -58,8 +58,8 @@ CREATE TABLE Viaggi
  Numero INT(10),
  Nave CHAR(10),
  Tipo_carico VARCHAR(20) DEFAULT NULL,
- Inizio_viaggio DATETIME,
- Fine_viaggio DATETIME,
+ Inizio_viaggio DATE,
+ Fine_viaggio DATE,
  Porto_partenza VARCHAR(30) REFERENCES Porti(Nome),
  Porto_destinazione VARCHAR(30) REFERENCES Porti(Nome),
  PRIMARY KEY (Numero,Nave),
@@ -88,3 +88,12 @@ CREATE TABLE Scali(
   FOREIGN KEY (Numero_viaggio,Nave) REFERENCES Viaggi(Numero,Nave),
   FOREIGN KEY (Porto) REFERENCES Porti(Nome)
 );
+
+LOAD DATA LOCAL INFILE './Txt/personale.txt' INTO TABLE  Personale;
+LOAD DATA LOCAL INFILE './Txt/facilities.txt' INTO TABLE  Facilities;
+LOAD DATA LOCAL INFILE './Txt/classi.txt' INTO TABLE  Classi;
+LOAD DATA LOCAL INFILE './Txt/navi.txt' INTO TABLE  Navi;
+LOAD DATA LOCAL INFILE './Txt/porti.txt' INTO TABLE  Porti;
+LOAD DATA LOCAL INFILE './Txt/viaggi.txt' INTO TABLE  Viaggi;
+LOAD DATA LOCAL INFILE './Txt/equipaggio.txt' INTO TABLE  Equipaggio;
+LOAD DATA LOCAL INFILE './Txt/scali.txt' INTO TABLE  Scali;

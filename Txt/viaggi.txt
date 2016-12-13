@@ -10,7 +10,7 @@
 84	IMO4439254	Jet fuel	2016-03-10	2016-03-14	Port of Osaka	Port of Fukuyama
 85	IMO4439254	MTBE	2016-04-2	2016-04-18	Port of Taichung	Port of Busan
 86	IMO4439254	Gasoline	2016-04-29	2016-05-15	Port of Busan	Port of Tokyo
-87	IMO4439254	MTBE	2016-05-31	'NULL'	Port of Shanghai	Port of Tokyo
+87	IMO4439254	MTBE	2016-05-31	null	Port of Shanghai	Port of Tokyo
 38	IMO5641147	Phosphate	2015-11-29	2015-12-30	Port of Taranto	Port of Melbourne
 39	IMO5641147	Bauxite	2016-01-28	2016-3-04	Port of Melbourne	Port of Taranto
 40	IMO5641147	Phosphate	2016-03-14	2016-04-3	Port of Taranto	Port of Odessa
