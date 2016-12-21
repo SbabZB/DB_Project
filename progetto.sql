@@ -88,12 +88,3 @@ CREATE TABLE Scali(
   FOREIGN KEY (Numero_viaggio,Nave) REFERENCES Viaggi(Numero,Nave),
   FOREIGN KEY (Porto) REFERENCES Porti(Nome)
 );
-
-LOAD DATA LOCAL INFILE './Txt/personale.txt' INTO TABLE  Personale;
-LOAD DATA LOCAL INFILE './Txt/facilities.txt' INTO TABLE  Facilities;
-LOAD DATA LOCAL INFILE './Txt/classi.txt' INTO TABLE  Classi;
-LOAD DATA LOCAL INFILE './Txt/navi.txt' INTO TABLE  Navi;
-LOAD DATA LOCAL INFILE './Txt/porti.txt' INTO TABLE  Porti;
-LOAD DATA LOCAL INFILE './Txt/viaggi.txt' INTO TABLE  Viaggi;
-LOAD DATA LOCAL INFILE './Txt/equipaggio.txt' INTO TABLE  Equipaggio;
-LOAD DATA LOCAL INFILE './Txt/scali.txt' INTO TABLE  Scali;

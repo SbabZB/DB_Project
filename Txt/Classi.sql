@@ -1,0 +1,3 @@
+INSERT INTO Classi (Nome,Tipo,Cantiere_costruzione,Lunghezza,Larghezza,Altezza,Livello_facilities,Velocita_crociera,Velocita_max,Equipaggio_max) VALUES
+('Medusa','Oil/Chemical','Tanker','STX Shipbuilding Co. Ltd., Pusan, Korea','215.2','35.8','52.8','4','11.0','17.8','35'),
+('Venere','Ore carrier','Oshima Shipbuilding Co., Ltd. Japan','182.0','33.5','44.7','3','10.5','13.2','28');
