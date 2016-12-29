@@ -1,5 +1,4 @@
-Funzione: selezionare il membro del personale con una determinata qualifica e grado con la data sbarco più vecchia
+Funzione: selezionare il membro del personale con una determinata qualifica e grado con la data sbarco piÃ¹ vecchia
 Query: il comandante della nave che ha fatto scalo nel porto in cui la nave ha fatto manutenzione 4
-Query: il personale sbarcato durante uno scalo a XXXXXXX e il personale che l'ha sostituito (tachenzia(neanche troppo in realtà(in realtà sisisi)))
-Query: la nave che è attiva da più tempo senza aver ricevuto manutenzione
-
+Query: il personale sbarcato durante uno scalo a XXXXXXX e il personale che l'ha sostituito (tachenzia(neanche troppo in realtÃ (in realtÃ  sisisi)))
+Query: la nave che Ã¨ attiva da piÃ¹ tempo senza aver ricevuto manutenzione
