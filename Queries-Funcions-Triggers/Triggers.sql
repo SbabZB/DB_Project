@@ -1,3 +1,5 @@
+/*Trigger: BEFORE; prima dell'iserimento di un nuovo viaggio controlla che i porti di partenza e destinazione possano ospitare la nave*/
+
 DROP TRIGGER IF EXISTS comp_viaggi;
 DELIMITER //
 CREATE TRIGGER comp_viaggi BEFORE INSERT ON Viaggi
@@ -16,6 +18,21 @@ END IF;
 IF valid = 0 THEN
 SIGNAL SQLSTATE VALUE '45000'
 SET MESSAGE_TEXT = "INCOMPATIBILITA' PORTI Partenza/Destinazione con la classe";
+END IF;
+END//
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS num_viaggio;
+DELIMITER //
+CREATE TRIGGER num_viaggio BEFORE INSERT ON Viaggi
+FOR EACH ROW
+BEGIN
+DECLARE num INT(10);
+SELECT MAX(Numero) INTO num FROM Viaggi WHERE Nave = NEW.Nave AND Numero != NEW.Numero;
+IF NEW.Numero > num+1 THEN
+    SET NEW.Numero = num+1;
+    SIGNAL SQLSTATE '01001'
+    SET MESSAGE_TEXT = "Numero viaggio e' stato coretto", MYSQL_ERRNO = 1001;
 END IF;
 END//
 DELIMITER ;

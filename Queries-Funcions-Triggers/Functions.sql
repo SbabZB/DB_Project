@@ -8,14 +8,14 @@ BEGIN
 DECLARE num INT;
 DECLARE nav CHAR(10);
 SELECT Nave INTO nav
-	FROM (SELECT Nave, count(*) cont FROM Viaggi WHERE Inizio_viaggio >= inizio AND Fine_viaggio <= fine GROUP BY Nave) AS cv
-		JOIN Navi ON (cv.Nave = IMO_number)
-	WHERE cont = (SELECT max(cont)
-					FROM (SELECT Nave, count(*) cont
-							FROM Viaggi WHERE Inizio_viaggio >= inizio AND Fine_viaggio <= fine
-							GROUP BY Nave) AS cv)
-	ORDER BY Data_costruzione
-	LIMIT 1;
+FROM (SELECT Nave, count(*) cont FROM Viaggi WHERE Inizio_viaggio >= inizio AND Fine_viaggio <= fine GROUP BY Nave) AS cv
+JOIN Navi ON (cv.Nave = IMO_number)
+WHERE cont = (SELECT max(cont)
+FROM (SELECT Nave, count(*) cont
+FROM Viaggi WHERE Inizio_viaggio >= inizio AND Fine_viaggio <= fine
+GROUP BY Nave) AS cv)
+ORDER BY Data_costruzione
+LIMIT 1;
 RETURN nav;
 END//
 
