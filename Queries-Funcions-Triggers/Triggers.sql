@@ -31,8 +31,8 @@ DECLARE num INT(10);
 SELECT MAX(Numero) INTO num FROM Viaggi WHERE Nave = NEW.Nave AND Numero != NEW.Numero;
 IF NEW.Numero > num+1 THEN
     SET NEW.Numero = num+1;
-    SIGNAL SQLSTATE '01001'
-    SET MESSAGE_TEXT = "Numero viaggio e' stato coretto", MYSQL_ERRNO = 1001;
+    SIGNAL SQLSTATE '01000'
+    SET MESSAGE_TEXT = "ATTENZIONE: Numero viaggio e' stato coretto", MYSQL_ERRNO = '1000';
 END IF;
 END//
 DELIMITER ;
