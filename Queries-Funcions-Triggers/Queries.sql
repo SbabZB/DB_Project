@@ -50,3 +50,30 @@ WHERE P.Nave = Sc.Nave
   AND Data_sbarco IS NULL
   AND Grado = "Comandante"
 ;
+
+DROP FUNCTION IF EXISTS anzianitaMembro;
+CREATE FUNCTION anzianitaMembro(matricola CHAR(7))
+RETURNS INT
+
+BEGIN
+DECLARE sommaDate INT;
+DECLARE differenzaDate INT;
+DECLARE dataImbarco DATE;
+DECLARE dataSbarco DATE;
+DECLARE index INT;
+SET dataImbarco = '1000-01-01';
+SET sommaDate = 0;
+
+SELECT count(*) INTO index FROM Equipaggio WHERE Membro = matricola;
+
+WHILE index>0 DO
+  SELECT Data_imbarco INTO dataImbarco, Data_sbarco INTO dataSbarco
+  FROM Equipaggio
+  WHERE Membro = matricola;
+  SELECT DATEDIFF(dataSbarco,dataImbarco) INTO differenzaDate
+  FROM Equipaggio
+  WHERE Data_imbarco>dataImbarco AND Membro = matricola
+  ORDER BY Data_imbarco LIMIT 1;
+  SET index = index-1;
+  SET sommaDate = sommaDate + differenzaDate;
+END WHILE
