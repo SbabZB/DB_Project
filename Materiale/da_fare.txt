@@ -1,15 +1,15 @@
 #FATTA        1_(Procedura: selezionare il membro del personale con una determinata qualifica e grado con la data sbarco più vecchia)
 #FATTA        2_(Query: il comandante della nave che ha fatto scalo nel porto in cui la nave ha fatto manutenzione)
 #FATTA        3_(Query: il personale sbarcato durante uno scalo a XXXXXXX e il personale che l'ha sostituito (tachenzia(neanche troppo in realtà(in realtà sisisi))))
-#IMPOSSIBILE  4_(Query: la nave che è attiva da più tempo senza aver ricevuto manutenzione)
+#IMPOSSIBILE  X_(Query: la nave che è attiva da più tempo senza aver ricevuto manutenzione)
 #FATTA        1_(Funzione: Compatibilita(Nave,Porto) Ritorna una stringa "Compatibile" o "Incompatibile" a seconda se una nave può o meno entrare in un certo porto)
 #FATTO        1_(Trigger: AFTER su tabella Viaggi; prima dell'iserimento di un nuovo viaggio controlla che i porti di partenza e destinazione possano ospitare la nave <-
                   -> (utilizza la funzione Compatibilita(Nave,Porto)))
 #FATTO        2_(Trigger: BEFORE su tabella Viaggi; Controlla che il numero di viaggio inserito sia in sucessione con quelli relativi a quella determitata nave, se non <-
                   -> lo è viene corretto)
-Procedura per trovare il membro del personale attualmente imbarcato da più tempo;
+#FATTA        4_(Procedura per trovare il membro del personale attualmente imbarcato da più tempo)
 Procedura o Query per trovare il personale che ha prestato servizio su una determinata nave in un certo intervallo di tempo (restituisce anche data sbarco e imbarco <-
-                  -> dei vari membri);
-Funzione per calcolare il totale di giorni/mesi/anni di imbarco di un membro del personale;
+                  -> dei vari membri)
+#FATTA        2_(Funzione per calcolare il totale di giorni/mesi/anni di imbarco di un membro del personale)
 Funzione per calcolare il totale di giorni/mesi/anni di servizio prestati su una determinata nave da un ufficiale;
-Trigger(AFTER) per garantire la coerenza tra i domini del dato presente nella colonna Qualifica e quello nelal comanna Grado;
+#FATTO        3_(Trigger(AFTER) per garantire la coerenza tra i domini del dato presente nella colonna Qualifica e quello nella comanna Grado)

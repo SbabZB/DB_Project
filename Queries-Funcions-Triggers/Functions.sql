@@ -58,7 +58,7 @@ END//
 
 DELIMITER ;
 
-
+/* Finzione che ritorna il numero di giorni di imbarco di un membro del personale, non vengono contati i giorni del*/
 DROP FUNCTION IF EXISTS anzianitaMembro;
 DELIMITER //
 CREATE FUNCTION anzianitaMembro(matricola CHAR(7))
@@ -66,11 +66,17 @@ RETURNS INT
 
 BEGIN
 DECLARE sommaDate INT;
+DECLARE differenzaDate INT;
+SET differenzaDate = 0;
 
   SELECT SUM(DATEDIFF(Data_sbarco,Data_imbarco)) INTO sommaDate
   FROM Equipaggio
   WHERE Membro = matricola
     AND Data_sbarco IS NOT NULL;
+
+  SELECT DATEDIFF(CURDATE(),Data_imbarco) INTO differenzaDate FROM Equipaggio WHERE Membro = matricola AND Data_sbarco IS NULL;
+  SET sommaDate = sommaDate + differenzaDate;
+
 
 RETURN sommaDate;
 END//
