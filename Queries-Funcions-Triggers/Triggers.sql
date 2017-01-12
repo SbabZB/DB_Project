@@ -1,4 +1,4 @@
-/*Trigger: BEFORE; prima dell'iserimento di un nuovo viaggio controlla che i porti di partenza e destinazione possano ospitare la nave*/
+/*Trigger: AFTER; prima dell'iserimento di un nuovo viaggio controlla che i porti di partenza e destinazione possano ospitare la nave*/
 
 DROP TRIGGER IF EXISTS comp_viaggi;
 DELIMITER //
@@ -22,6 +22,7 @@ END IF;
 END//
 DELIMITER ;
 
+/*Trigger: BEFORE su tabella Viaggi; Controlla e in caso corregge che il numero di viaggio inserito sia in sucessione con quelli relativi alla nave*/
 DROP TRIGGER IF EXISTS num_viaggio;
 DELIMITER //
 CREATE TRIGGER num_viaggio BEFORE INSERT ON Viaggi

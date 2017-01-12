@@ -51,6 +51,23 @@ WHERE P.Nave = Sc.Nave
   AND Grado = "Comandante"
 ;
 
+DROP PROCEDURE IF EXISTS membroDaSbarcare;
+DELIMITER //
+CREATE PROCEDURE membroDaSbarcare(qual VARCHAR(20), gr VARCHAR(30))
+BEGIN
+	SELECT Matricola, Nome, Cognome
+	FROM (SELECT * FROM Personale JOIN Equipaggio ON Matricola = Membro) AS x
+	WHERE x.Matricola NOT IN (SELECT Membro FROM Equipaggio WHERE Data_sbarco IS NULL)
+	AND Qualifica = qual
+	AND Grado = gr
+	AND Data_sbarco = (SELECT MIN(Data_sbarco)
+	FROM (SELECT * FROM Personale JOIN Equipaggio ON Matricola = Membro) AS x
+	WHERE x.Matricola NOT IN (SELECT Membro FROM Equipaggio WHERE Data_sbarco IS NULL)
+	AND Qualifica = qual
+	AND Grado = gr);
+END//
+DELIMITER ;
+
 DROP FUNCTION IF EXISTS anzianitaMembro;
 CREATE FUNCTION anzianitaMembro(matricola CHAR(7))
 RETURNS INT
