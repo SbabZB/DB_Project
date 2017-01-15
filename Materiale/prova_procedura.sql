@@ -34,3 +34,16 @@ BEGIN
 	AND Grado = gr);
 END//
 DELIMITER ;
+
+/**procedura per tirare fuori com e primo da un viaggio ancora in corso*/
+SELECT cpt.Nave, cpt.Matricola AS Matricola_cpt, cpt.Cognome AS Cognome_cpt,
+       cpt.Nome AS Nome_cpt, fmt.Matricola AS Matricola_fmt, fmt.Cognome AS Cognome_fmt,
+       fmt.Nome AS Nome_fmt
+FROM (SELECT * FROM Equipaggio JOIN Personale ON Membro = Matricola) AS cpt,
+     (SELECT * FROM Equipaggio JOIN Personale ON Membro = Matricola) AS fmt
+WHERE cpt.Grado = "Comandante"
+	AND fmt.Grado = "Primo di coperta"
+	AND cpt.Data_sbarco IS NULL
+	AND fmt.Data_sbarco IS NULL
+	AND cpt.Nave = (SELECT IMO_number FROM Navi WHERE Stato_corrente LIKE "%port operations%")
+	AND fmt.Nave = cpt.Nave

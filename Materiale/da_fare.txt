@@ -13,3 +13,4 @@ Procedura o Query per trovare il personale che ha prestato servizio su una deter
 #FATTA        2_(Funzione per calcolare il totale di giorni/mesi/anni di imbarco di un membro del personale)
 Funzione per calcolare il totale di giorni/mesi/anni di servizio prestati su una determinata nave da un ufficiale;
 #FATTO        3_(Trigger(AFTER) per garantire la coerenza tra i domini del dato presente nella colonna Qualifica e quello nella comanna Grado)
+Query che restituisce la nave(IMO_number, nome) il comandante(Matricola, Nome, Cognome), il primo ufficiale di copera(Matricola, Nome, Cognome) e il tipo di carico della nave ipiegata in operazioni portuali

@@ -51,6 +51,7 @@ WHERE P.Nave = Sc.Nave
   AND Grado = "Comandante"
 ;
 
+/* Procedura per trovare il membro del personale attualmente imbarcato da più tempo */
 DROP PROCEDURE IF EXISTS membroDaSbarcare;
 DELIMITER //
 CREATE PROCEDURE membroDaSbarcare(qual VARCHAR(20), gr VARCHAR(30))
@@ -67,3 +68,30 @@ BEGIN
 	AND Grado = gr);
 END//
 DELIMITER ;
+
+/* Query che restituisce la nave(IMO_number) il comandante(Matricola, Nome, Cognome),
+   il primo ufficiale di copera(Matricola, Nome, Cognome) e il tipo di carico della nave ipiegata in operazioni portuali */
+
+CREATE OR REPLACE VIEW OperazioniPortualiCorrenti AS
+SELECT n.IMO_number, n.Nome,Numero AS Numero_viaggio, Tipo_carico, Porto_destinazione AS Porto, Matricola_cpt,
+       Cognome_cpt, Nome_cpt, Matricola_fmt, Cognome_fmt, Nome_fmt
+FROM Navi n,
+     (SELECT cpt.Nave, cpt.Matricola AS Matricola_cpt, cpt.Cognome AS Cognome_cpt,
+      cpt.Nome AS Nome_cpt, fmt.Matricola AS Matricola_fmt, fmt.Cognome AS Cognome_fmt,
+      fmt.Nome AS Nome_fmt
+      FROM (SELECT * FROM Equipaggio JOIN Personale ON Membro = Matricola) AS cpt,
+           (SELECT * FROM Equipaggio JOIN Personale ON Membro = Matricola) AS fmt
+      WHERE cpt.Grado = "Comandante"
+	    AND fmt.Grado = "Primo di coperta"
+	    AND cpt.Data_sbarco IS NULL
+	    AND fmt.Data_sbarco IS NULL
+	    AND cpt.Nave = (SELECT IMO_number FROM Navi WHERE Stato_corrente LIKE "%port operations%")
+	    AND fmt.Nave = cpt.Nave) AS x,
+     Viaggi v
+WHERE n.IMO_number = x.Nave
+  AND v.Numero = (SELECT Numero
+                  FROM Viaggi
+                  WHERE Nave = (SELECT IMO_number FROM Navi WHERE Stato_corrente LIKE "%port operations%")
+                  ORDER BY Numero DESC LIMIT 1);
+
+/* Procedura per trovare l'equipaggio */
