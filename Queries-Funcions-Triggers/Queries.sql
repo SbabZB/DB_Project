@@ -7,7 +7,7 @@ DELIMITER //
 CREATE PROCEDURE portfacilities (nomeporto VARCHAR(50))
 BEGIN
 SELECT p.Nome, f.Nome, f.Livello
-FROM Porti p, Facilities f
+FROM Porto p, Facility f
 WHERE p.Nome = nomeporto AND f.Livello <= p.Livello_facilities
 ORDER BY f.Livello;
 END//
@@ -28,7 +28,7 @@ JOIN (SELECT *
 WHERE P_sbar.Qualifica = P_imb.Qualifica
   AND P_sbar.Grado = P_imb.Grado) AS K
   JOIN (SELECT Nave, CAST(ETA AS DATE) AS ETA, Numero_viaggio AS No_Viag, Operazione, Porto, CAST(Data_arrivo AS DATE) AS Data_arr,
-        CAST(Data_partenza AS DATE) AS Data_part FROM Scali) AS S
+        CAST(Data_partenza AS DATE) AS Data_part FROM Scalo) AS S
   WHERE S.Nave = K.Nave
   AND S.Data_arr = "2016-02-22"
 ;
@@ -40,7 +40,7 @@ SELECT P.Nave,Matricola,Nome,Cognome,Grado,Data_imbarco,Data_sbarco,Viaggio,Data
 FROM (SELECT Nave,Matricola,Nome,Cognome,Grado,Data_imbarco,Data_sbarco
         FROM Equipaggio JOIN Personale ON Membro = Matricola) AS P
   JOIN (SELECT Nave,Numero_viaggio AS Viaggio,CAST(Data_arrivo AS DATE)AS Data_arrivo,Porto
-        FROM Scali WHERE Operazione LIKE "%Manutenzione%" ORDER BY Data_arrivo DESC LIMIT 1) AS Sc
+        FROM Scalo WHERE Operazione LIKE "%Manutenzione%" ORDER BY Data_arrivo DESC LIMIT 1) AS Sc
 WHERE P.Nave = Sc.Nave
   AND Data_imbarco < Data_arrivo
   AND Data_sbarco > Data_arrivo
@@ -73,7 +73,7 @@ DELIMITER ;
    il primo ufficiale di copera(Matricola, Nome, Cognome) e il tipo di carico della nave ipiegata in operazioni portuali */
 
 CREATE OR REPLACE VIEW OperazioniPortualiCorrenti AS
-SELECT n.IMO_number, n.Nome,Numero AS Numero_viaggio, Tipo_carico, Porto_destinazione AS Porto, Matricola_cpt,
+SELECT n.IMO_number, n.Nome AS Nome_nave,Numero AS Numero_viaggio, Tipo_carico, Porto_destinazione AS Porto, Matricola_cpt,
        Cognome_cpt, Nome_cpt, Matricola_fmt, Cognome_fmt, Nome_fmt
 FROM Navi n,
      (SELECT cpt.Nave, cpt.Matricola AS Matricola_cpt, cpt.Cognome AS Cognome_cpt,
@@ -85,13 +85,13 @@ FROM Navi n,
 	    AND fmt.Grado = "Primo di coperta"
 	    AND cpt.Data_sbarco IS NULL
 	    AND fmt.Data_sbarco IS NULL
-	    AND cpt.Nave = (SELECT IMO_number FROM Navi WHERE Stato_corrente LIKE "%port operations%")
+	    AND cpt.Nave = (SELECT IMO_number FROM Nave WHERE Stato_corrente LIKE "%port operations%")
 	    AND fmt.Nave = cpt.Nave) AS x,
      Viaggi v
 WHERE n.IMO_number = x.Nave
   AND v.Numero = (SELECT Numero
                   FROM Viaggi
-                  WHERE Nave = (SELECT IMO_number FROM Navi WHERE Stato_corrente LIKE "%port operations%")
+                  WHERE Nave = (SELECT IMO_number FROM Nave WHERE Stato_corrente LIKE "%port operations%")
                   ORDER BY Numero DESC LIMIT 1);
 
 /* Procedura per trovare l'equipaggio */

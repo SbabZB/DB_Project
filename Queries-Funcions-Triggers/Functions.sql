@@ -8,12 +8,12 @@ BEGIN
 DECLARE num INT;
 DECLARE nav CHAR(10);
 SELECT Nave INTO nav
-FROM (SELECT Nave, count(*) cont FROM Viaggi WHERE Inizio_viaggio >= inizio AND Fine_viaggio <= fine GROUP BY Nave) AS cv
+FROM (SELECT Nave, count(*) cont FROM Viaggo WHERE Inizio_viaggio >= inizio AND Fine_viaggio <= fine GROUP BY Nave) AS cv
 JOIN Navi ON (cv.Nave = IMO_number)
 WHERE cont = (SELECT max(cont)
 FROM (SELECT Nave, count(*) cont
-FROM Viaggi WHERE Inizio_viaggio >= inizio AND Fine_viaggio <= fine
-GROUP BY Nave) AS cv)
+      FROM Viaggo WHERE Inizio_viaggio >= inizio AND Fine_viaggio <= fine
+      GROUP BY Nave) AS cv)
 ORDER BY Data_costruzione
 LIMIT 1;
 RETURN nav;
@@ -47,9 +47,9 @@ DECLARE comp VARCHAR(13);
 DECLARE class VARCHAR(50);
 DECLARE lvlFaci INT(1);
 DECLARE lvlPort INT(1);
-SELECT Classe INTO class FROM Navi WHERE IMO_number = nave;
-SELECT Livello_facilities INTO lvlFaci FROM Classi WHERE Nome = class;
-SELECT Livello_facilities INTO lvlPort FROM Porti WHERE Nome = port;
+SELECT Classe INTO class FROM Nave WHERE IMO_number = nave;
+SELECT Livello_facilities INTO lvlFaci FROM Classe WHERE Nome = class;
+SELECT Livello_facilities INTO lvlPort FROM Porto WHERE Nome = port;
 IF lvlFaci <= lvlPort THEN SET comp = "compatibile";
 ELSE SET comp = "incompatibile";
 END IF;

@@ -29,7 +29,7 @@ CREATE TRIGGER num_viaggio BEFORE INSERT ON Viaggi
 FOR EACH ROW
 BEGIN
 DECLARE num INT(10);
-SELECT MAX(Numero) INTO num FROM Viaggi WHERE Nave = NEW.Nave AND Numero != NEW.Numero;
+SELECT MAX(Numero) INTO num FROM Viaggo WHERE Nave = NEW.Nave AND Numero != NEW.Numero;
 IF NEW.Numero > num+1 THEN
     SET NEW.Numero = num+1;
     SIGNAL SQLSTATE '01000'

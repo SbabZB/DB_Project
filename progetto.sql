@@ -1,3 +1,5 @@
+SET FOREIGN_KEY_CHECKS=0;
+
 CREATE TABLE Personale
 (
  Matricola CHAR(7),
@@ -10,13 +12,13 @@ CREATE TABLE Personale
   PRIMARY KEY (Matricola)
 );
 
-CREATE TABLE Facilities(
+CREATE TABLE Facility(
   Nome varchar(50),
   Livello int(1),
   PRIMARY KEY (Nome)
 );
 
-CREATE TABLE Classi(
+CREATE TABLE Classe(
   Nome varchar(50),
   Tipo varchar(20),
   Cantiere_costruzione varchar(50),
@@ -30,7 +32,7 @@ CREATE TABLE Classi(
   PRIMARY KEY (Nome,Tipo,Cantiere_costruzione)
 );
 
-CREATE TABLE Navi
+CREATE TABLE Nave
 (
   IMO_number char(10),
   Nome varchar(20),
@@ -43,17 +45,17 @@ CREATE TABLE Navi
   Stato_corrente varchar(40),
   Velocita_attuale numeric(3,1) DEFAULT 0,
   PRIMARY KEY (IMO_number),
-  FOREIGN KEY (Classe) REFERENCES Classi(Nome)
+  FOREIGN KEY (Classe) REFERENCES Classi(Nome) ON DELETE SET NULL;
 );
 
-CREATE TABLE Porti(
+CREATE TABLE Porto(
   Nome varchar(50),
   Livello_facilities int(1),
   Nazione varchar(30),
   PRIMARY KEY (Nome)
 );
 
-CREATE TABLE Viaggi
+CREATE TABLE Viaggio
 (
  Numero INT(10),
  Nave CHAR(10),
@@ -63,7 +65,7 @@ CREATE TABLE Viaggi
  Porto_partenza VARCHAR(30) REFERENCES Porti(Nome),
  Porto_destinazione VARCHAR(30) REFERENCES Porti(Nome),
  PRIMARY KEY (Numero,Nave),
-FOREIGN KEY (Nave) REFERENCES Navi(IMO_number)
+ FOREIGN KEY (Nave) REFERENCES Navi(IMO_number) ON DELETE CASCADE ON UPDATE CASCADE;
 );
 
 CREATE TABLE Equipaggio
@@ -76,7 +78,7 @@ CREATE TABLE Equipaggio
  FOREIGN KEY (Nave) REFERENCES Navi(IMO_number)
 );
 
-CREATE TABLE Scali(
+CREATE TABLE Scalo(
   ETA DATETIME,
   Nave char(10),
   Numero_viaggio int(10),
@@ -89,11 +91,11 @@ CREATE TABLE Scali(
   FOREIGN KEY (Porto) REFERENCES Porti(Nome)
 );
 
-INSERT INTO Classi (Nome,Tipo,Cantiere_costruzione,Lunghezza,Larghezza,Altezza,Livello_facilities,Velocita_crociera,Velocita_max,Equipaggio_max) VALUES
+INSERT INTO Classe (Nome,Tipo,Cantiere_costruzione,Lunghezza,Larghezza,Altezza,Livello_facilities,Velocita_crociera,Velocita_max,Equipaggio_max) VALUES
 ('Medusa','Oil/Chemical Tanker','STX Shipbuilding Co. Ltd., Pusan, Korea','215.2','35.8','52.8','4','11.0','17.8','35'),
 ('Venere','Ore carrier','Oshima Shipbuilding Co., Ltd. Japan','182.0','33.5','44.7','3','10.5','13.2','28');
 
-INSERT INTO Navi (IMO_number,Nome,Classe,Stato_di_bandiera,Data_costruzione,Data_ultima_posizione,Latitudine_ultima_posizione,Longitudine_ultima_posizione,Stato_corrente,Velocita_attuale) VALUES
+INSERT INTO Nave (IMO_number,Nome,Classe,Stato_di_bandiera,Data_costruzione,Data_ultima_posizione,Latitudine_ultima_posizione,Longitudine_ultima_posizione,Stato_corrente,Velocita_attuale) VALUES
 ('IMO4438756','Medusa','Medusa','Italy','2007-10-23','2016-06-20 09:30:11','35.151364','-67.051525','under way/using engine','11.8'),
 ('IMO4439254','Calypso','Medusa','Italy','2008-03-01','2016-06-20 10:05:16','34.855917','139.725495','adrift/waiting for pilot','0.6'),
 ('IMO5641147','Venere','Venere','Italy','2014-01-30','2016-05-10 00:01:41','38.138786','13.370468','dry dock/maintenance','0.0'),
@@ -328,7 +330,7 @@ INSERT INTO Equipaggio (Nave,Membro,Data_imbarco,Data_sbarco) VALUES
 ('IMO5641234','PA58954','2016-05-10',NULL),
 ('IMO5641234','PA68107','2016-05-10',NULL);
 
-INSERT INTO Porti (Nome,Livello_facilities,Nazione) VALUES
+INSERT INTO Porto (Nome,Livello_facilities,Nazione) VALUES
 ('Port of Rotterdam','4','Netherlands'),
 ('Port of Antwerp','3','Belgium'),
 ('Port of Immingham','4','United Kingdom'),
@@ -374,7 +376,7 @@ INSERT INTO Porti (Nome,Livello_facilities,Nazione) VALUES
 ('Port of Port Said','2','Egypt'),
 ('Port of Siracusa','4','Italy');
 
-INSERT INTO Facilities (Nome,Livello) VALUES
+INSERT INTO Facility (Nome,Livello) VALUES
 ('Police portuale','0'),
 ('Fire Department','0'),
 ('Capitaneria di porto','0'),
@@ -391,7 +393,7 @@ INSERT INTO Facilities (Nome,Livello) VALUES
 ('LNG terminal','4'),
 ('Fire Department CDS','4');
 
-INSERT INTO Viaggi (Numero,Nave,Tipo_carico,Inizio_viaggio,Fine_viaggio,Porto_partenza,Porto_destinazione) VALUES
+INSERT INTO Viaggio (Numero,Nave,Tipo_carico,Inizio_viaggio,Fine_viaggio,Porto_partenza,Porto_destinazione) VALUES
 ('96','IMO4438756','Gasoline','2015-11-22','2016-12-16','Port of Rotterdam','Port of Genoa'),
 ('97','IMO4438756','Gasoline','2016-1-23','2016-02-08','Port of Barcelona','Port of Augusta'),
 ('98','IMO4438756','Jet fuel','2016-2-10','2016-02-20','Port of Augusta','Port of Ashdod'),
@@ -415,7 +417,7 @@ INSERT INTO Viaggi (Numero,Nave,Tipo_carico,Inizio_viaggio,Fine_viaggio,Porto_pa
 ('35','IMO5641234','Bauxite','2016-03-17','2016-04-16','Port of Melbourne','Port of Osaka'),
 ('36','IMO5641234','Grain','2016-05-10','2016-06-17','Port of Shanghai','Port of Melbourne');
 
-INSERT INTO Scali (ETA,Nave,Numero_viaggio,Operazione,Porto,Data_arrivo,Data_partenza) VALUES
+INSERT INTO Scalo (ETA,Nave,Numero_viaggio,Operazione,Porto,Data_arrivo,Data_partenza) VALUES
 ('2016-03-28 01:00','IMO4438756','99','Personale/Provviste','Port of Istanbul','2016-03-28 00:20','2016-03-28 08:32'),
 ('2016-04-23 16:00','IMO4438756','100','Rifornimento','Port of Palermo','2016-4-23 16:21','2016-04-24 05:50'),
 ('2016-02-18 05:30','IMO4439254','82','Personale/Rifornimento','Port of Fukuyama','2016-02-18 05:26','2016-02-18 15:11'),
@@ -423,3 +425,5 @@ INSERT INTO Scali (ETA,Nave,Numero_viaggio,Operazione,Porto,Data_arrivo,Data_par
 ('2016-02-22 10:00','IMO5641147','39','Ispezione/Personale','Port of Siracusa','2016-02-22 11:10','2016-02-23 00:15'),
 ('2016-02-24 22:00','IMO5641147','39','Manutenzione','Port of Palermo','2016-02-24 20:18','2016-03-01 11:20'),
 ('2016-04-24 03:00','IMO5641147','41','Personale/Provviste','Port of Istanbul','2016-04-24 03:01','2016-04-24 06:15');
+
+SET FOREIGN_KEY_CHECKS=1;
