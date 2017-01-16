@@ -94,4 +94,19 @@ WHERE n.IMO_number = x.Nave
                   WHERE Nave = (SELECT IMO_number FROM Nave WHERE Stato_corrente LIKE "%port operations%")
                   ORDER BY Numero DESC LIMIT 1);
 
-/* Procedura per trovare l'equipaggio */
+/* Procedura per trovare l'equipaggio in una data data di una data nave */
+
+DROP PROCEDURE IF EXISTS trovaEquipaggio;
+DELIMITER //
+CREATE PROCEDURE trovaEquipaggio(data DATE, nav CHAR(10))
+BEGIN
+SELECT *
+FROM Equipaggio JOIN Personale ON Membro = Matricola
+WHERE Nave = nav
+  AND Data_imbarco <= data
+  AND Data_sbarco >= data
+   OR Nave = nav
+  AND Data_imbarco <= data
+  AND Data_sbarco IS NULL;
+END//
+DELIMITER ;
