@@ -113,6 +113,7 @@ DELIMITER ;
 
 /* Query che trova quanta gente si trovava imbarcata su una nave durante un'ispezione portuale in uno scalo
     e quanto personale massimo puo' portare la nave */
+DROP PROCEDURE IF EXISTS numeroEquipaggio;
 DELIMITER //
 CREATE PROCEDURE numeroEquipaggio(data DATE, nav CHAR(10))
 BEGIN
@@ -123,7 +124,7 @@ FROM (SELECT Equipaggio_max, IMO_number
      JOIN (SELECT COUNT(*) AS Numero_imbarcati
            FROM Equipaggio JOIN (SELECT Nave AS NaveS, CAST(Data_arrivo AS DATE) AS Data_arrivo
                                  FROM Scalo
-                                 WHERE Data_arrivo = data AND Nave = nav) AS scl
+                                 WHERE CAST(Data_arrivo AS DATE) = data AND Nave = nav) AS scl
            WHERE Nave = NaveS
            AND Data_imbarco <= Data_arrivo
            AND Data_sbarco >= Data_arrivo
