@@ -75,7 +75,7 @@ DELIMITER ;
 CREATE OR REPLACE VIEW OperazioniPortualiCorrenti AS
 SELECT n.IMO_number, n.Nome AS Nome_nave,Numero AS Numero_viaggio, Tipo_carico, Porto_destinazione AS Porto, Matricola_cpt,
        Cognome_cpt, Nome_cpt, Matricola_fmt, Cognome_fmt, Nome_fmt
-FROM Navi n,
+FROM Nave n,
      (SELECT cpt.Nave, cpt.Matricola AS Matricola_cpt, cpt.Cognome AS Cognome_cpt,
       cpt.Nome AS Nome_cpt, fmt.Matricola AS Matricola_fmt, fmt.Cognome AS Cognome_fmt,
       fmt.Nome AS Nome_fmt
@@ -87,7 +87,7 @@ FROM Navi n,
 	    AND fmt.Data_sbarco IS NULL
 	    AND cpt.Nave = (SELECT IMO_number FROM Nave WHERE Stato_corrente LIKE "%port operations%")
 	    AND fmt.Nave = cpt.Nave) AS x,
-     Viaggi v
+     Viaggio v
 WHERE n.IMO_number = x.Nave
   AND v.Numero = (SELECT Numero
                   FROM Viaggi
@@ -114,13 +114,21 @@ DELIMITER ;
 /* Query che trova quanta gente si trovava imbarcata su una nave durante un'ispezione portuale in uno scalo
     e quanto personale massimo puo' portare la nave */
 CREATE OR REPLACE VIEW NumeroImbarcati AS
-SELECT
+SELECT *
 FROM (SELECT Equipaggio_max, IMO_number
       FROM Classe JOIN Nave ON Classe.Nome = Nave.Classe
       WHERE IMO_number = (SELECT Nave
                           FROM Scalo
                           WHERE Operazione LIKE "%Ispezione%")) AS eqMax
      JOIN Scalo ON eqMax.IMO_number = Nave
-     JOIN (SELECT COUNT(*)
-           FROM Equipaggio
-           WHERE Data_imbarco <= (SELECT DATE()))
+     JOIN (SELECT COUNT(*) AS Numero_imbarcati
+           FROM Equipaggio JOIN (SELECT Nave AS NaveS, CAST(Data_arrivo AS DATE) AS Data_arrivo
+                                 FROM Scalo
+                                 WHERE Operazione LIKE "%Ispezione%") AS scl
+           WHERE Nave = NaveS
+           AND Data_imbarco <= Data_arrivo
+           AND Data_sbarco >= Data_arrivo
+           OR Nave = NaveS
+           AND Data_imbarco <= Data_arrivo
+           AND Data_sbarco IS NULL) AS nImb
+WHERE Operazione LIKE "%Ispezione%"
