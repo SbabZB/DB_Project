@@ -45,7 +45,7 @@ CREATE TABLE Nave
   Stato_corrente varchar(40),
   Velocita_attuale numeric(3,1) DEFAULT 0,
   PRIMARY KEY (IMO_number),
-  FOREIGN KEY (Classe) REFERENCES Classi(Nome) ON DELETE SET NULL;
+  FOREIGN KEY (Classe) REFERENCES Classi(Nome) ON DELETE SET NULL
 );
 
 CREATE TABLE Porto(
@@ -65,7 +65,7 @@ CREATE TABLE Viaggio
  Porto_partenza VARCHAR(30) REFERENCES Porti(Nome),
  Porto_destinazione VARCHAR(30) REFERENCES Porti(Nome),
  PRIMARY KEY (Numero,Nave),
- FOREIGN KEY (Nave) REFERENCES Navi(IMO_number) ON DELETE CASCADE ON UPDATE CASCADE;
+ FOREIGN KEY (Nave) REFERENCES Navi(IMO_number) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE Equipaggio
