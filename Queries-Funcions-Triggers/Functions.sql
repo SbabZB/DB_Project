@@ -1,5 +1,6 @@
 /* Funzione per trovare la nave, più vecchia che ha effettuato il più alto numero di viaggi in un determinato periodo di tempo */
 
+DROP FUNCTION IF EXISTS maxViaggi;
 DELIMITER //
 
 CREATE FUNCTION	maxViaggi(inizio DATE, fine DATE)
@@ -8,11 +9,11 @@ BEGIN
 DECLARE num INT;
 DECLARE nav CHAR(10);
 SELECT Nave INTO nav
-FROM (SELECT Nave, count(*) cont FROM Viaggo WHERE Inizio_viaggio >= inizio AND Fine_viaggio <= fine GROUP BY Nave) AS cv
-JOIN Navi ON (cv.Nave = IMO_number)
+FROM (SELECT Nave, count(*) cont FROM Viaggio WHERE Inizio_viaggio >= inizio AND Fine_viaggio <= fine GROUP BY Nave) AS cv
+JOIN Nave ON (cv.Nave = IMO_number)
 WHERE cont = (SELECT max(cont)
 FROM (SELECT Nave, count(*) cont
-      FROM Viaggo WHERE Inizio_viaggio >= inizio AND Fine_viaggio <= fine
+      FROM Viaggio WHERE Inizio_viaggio >= inizio AND Fine_viaggio <= fine
       GROUP BY Nave) AS cv)
 ORDER BY Data_costruzione
 LIMIT 1;

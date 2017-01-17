@@ -113,22 +113,24 @@ DELIMITER ;
 
 /* Query che trova quanta gente si trovava imbarcata su una nave durante un'ispezione portuale in uno scalo
     e quanto personale massimo puo' portare la nave */
-CREATE OR REPLACE VIEW NumeroImbarcati AS
-SELECT *
+DELIMITER //
+CREATE PROCEDURE numeroEquipaggio(data DATE, nav CHAR(10))
+BEGIN
+SELECT Nave, Numero_viaggio, Operazione, Porto, Data_arrivo AS Data, Numero_imbarcati, Equipaggio_max
 FROM (SELECT Equipaggio_max, IMO_number
-      FROM Classe JOIN Nave ON Classe.Nome = Nave.Classe
-      WHERE IMO_number = (SELECT Nave
-                          FROM Scalo
-                          WHERE Operazione LIKE "%Ispezione%")) AS eqMax
+      FROM Classe JOIN Nave ON Classe.Nome = Nave.Classe) AS eqMax
      JOIN Scalo ON eqMax.IMO_number = Nave
      JOIN (SELECT COUNT(*) AS Numero_imbarcati
            FROM Equipaggio JOIN (SELECT Nave AS NaveS, CAST(Data_arrivo AS DATE) AS Data_arrivo
                                  FROM Scalo
-                                 WHERE Operazione LIKE "%Ispezione%") AS scl
+                                 WHERE Data_arrivo = data AND Nave = nav) AS scl
            WHERE Nave = NaveS
            AND Data_imbarco <= Data_arrivo
            AND Data_sbarco >= Data_arrivo
            OR Nave = NaveS
            AND Data_imbarco <= Data_arrivo
            AND Data_sbarco IS NULL) AS nImb
-WHERE Operazione LIKE "%Ispezione%"
+WHERE CAST(Data_arrivo AS DATE) = data
+AND Nave = nav;
+END //
+DELIMITER ;
