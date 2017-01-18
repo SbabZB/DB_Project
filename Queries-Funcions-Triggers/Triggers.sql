@@ -2,7 +2,7 @@
 
 DROP TRIGGER IF EXISTS comp_viaggi;
 DELIMITER //
-CREATE TRIGGER comp_viaggi AFTER INSERT ON Viaggi
+CREATE TRIGGER comp_viaggi AFTER INSERT ON Viaggio
 FOR EACH ROW
 BEGIN
 DECLARE comp VARCHAR(13);
@@ -25,7 +25,7 @@ DELIMITER ;
 /*Trigger: BEFORE su tabella Viaggi; Controlla e in caso corregge che il numero di viaggio inserito sia in sucessione con quelli relativi alla nave*/
 DROP TRIGGER IF EXISTS num_viaggio;
 DELIMITER //
-CREATE TRIGGER num_viaggio BEFORE INSERT ON Viaggi
+CREATE TRIGGER num_viaggio BEFORE INSERT ON Viaggio
 FOR EACH ROW
 BEGIN
 DECLARE num INT(10);
@@ -79,12 +79,3 @@ END IF;
 
 END//
 DELIMITER ;
-
-THEN
-SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'Inserito valore per Grado non coerente con Qualifica.';
-
-END IF
-END//
-
-DELIMITER;

@@ -2,7 +2,6 @@
 
 DROP FUNCTION IF EXISTS maxViaggi;
 DELIMITER //
-
 CREATE FUNCTION	maxViaggi(inizio DATE, fine DATE)
 RETURNS CHAR(10)
 BEGIN
@@ -19,7 +18,6 @@ ORDER BY Data_costruzione
 LIMIT 1;
 RETURN nav;
 END//
-
 DELIMITER ;
 
 /*DELIMITER //
@@ -40,7 +38,6 @@ select maxViaggi('2016-02-01','2016-05-01');
 /* Funzione che ritorna una stringa "compatibile" o "incompatibile" a seconda se una nave può o meno entrare in un certo porto */
 
 DELIMITER //
-
 CREATE FUNCTION compatibilita(nave CHAR(10),port VARCHAR(50))
 RETURNS VARCHAR(13)
 BEGIN
@@ -56,7 +53,6 @@ ELSE SET comp = "incompatibile";
 END IF;
 RETURN comp;
 END//
-
 DELIMITER ;
 
 /* Finzione che ritorna il numero di giorni di imbarco di un membro del personale, non vengono contati i giorni del*/

@@ -1,10 +1,10 @@
 /* Procedura per trovare tutte le facilities di un determinato porto */
 
-DROP PROCEDURE IF EXISTS 'portfacilities';
+DROP PROCEDURE IF EXISTS livelloFacility;
 
 DELIMITER //
 
-CREATE PROCEDURE portfacilities (nomeporto VARCHAR(50))
+CREATE PROCEDURE livelloFacility(nomeporto VARCHAR(50))
 BEGIN
 SELECT p.Nome, f.Nome, f.Livello
 FROM Porto p, Facility f
@@ -48,8 +48,7 @@ WHERE P.Nave = Sc.Nave
   OR P.Nave = Sc.Nave
   AND Data_imbarco < Data_arrivo
   AND Data_sbarco IS NULL
-  AND Grado = "Comandante"
-;
+  AND Grado = "Comandante";
 
 /* Procedura per trovare il membro del personale attualmente imbarcato da più tempo */
 DROP PROCEDURE IF EXISTS membroDaSbarcare;
@@ -90,7 +89,7 @@ FROM Nave n,
      Viaggio v
 WHERE n.IMO_number = x.Nave
   AND v.Numero = (SELECT Numero
-                  FROM Viaggi
+                  FROM Viaggio
                   WHERE Nave = (SELECT IMO_number FROM Nave WHERE Stato_corrente LIKE "%port operations%")
                   ORDER BY Numero DESC LIMIT 1);
 

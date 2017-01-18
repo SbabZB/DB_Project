@@ -9,7 +9,7 @@ CREATE TABLE Personale
  Cittadinanza VARCHAR(20),
  Qualifica VARCHAR(20),
  Grado VARCHAR(30),
-  PRIMARY KEY (Matricola)
+ PRIMARY KEY (Matricola)
 );
 
 CREATE TABLE Facility(
@@ -45,7 +45,7 @@ CREATE TABLE Nave
   Stato_corrente varchar(40),
   Velocita_attuale numeric(3,1) DEFAULT 0,
   PRIMARY KEY (IMO_number),
-  FOREIGN KEY (Classe) REFERENCES Classi(Nome) ON DELETE SET NULL
+  FOREIGN KEY (Classe) REFERENCES Classe(Nome) ON DELETE SET NULL
 );
 
 CREATE TABLE Porto(
@@ -62,20 +62,23 @@ CREATE TABLE Viaggio
  Tipo_carico VARCHAR(20) DEFAULT NULL,
  Inizio_viaggio DATE,
  Fine_viaggio DATE,
- Porto_partenza VARCHAR(30) REFERENCES Porti(Nome),
- Porto_destinazione VARCHAR(30) REFERENCES Porti(Nome),
+ Porto_partenza VARCHAR(30),
+ Porto_destinazione VARCHAR(30),
  PRIMARY KEY (Numero,Nave),
- FOREIGN KEY (Nave) REFERENCES Navi(IMO_number) ON DELETE CASCADE ON UPDATE CASCADE
+ FOREIGN KEY (Nave) REFERENCES Nave(IMO_number) ON DELETE CASCADE ON UPDATE CASCADE,
+ FOREIGN KEY (Porto_partenza) REFERENCES Porto(Nome) ON DELETE RESTRICT,
+ FOREIGN KEY (Porto_destinazione) REFERENCES Porto(Nome) ON DELETE RESTRICT
 );
 
 CREATE TABLE Equipaggio
 (
  Nave CHAR(10),
- Membro CHAR(7) REFERENCES Personale(Matricola),
+ Membro CHAR(7),
  Data_imbarco DATE,
  Data_sbarco DATE,
  PRIMARY KEY (Membro, Data_imbarco),
- FOREIGN KEY (Nave) REFERENCES Navi(IMO_number)
+ FOREIGN KEY (Nave) REFERENCES Nave(IMO_number) ON DELETE CASCADE,
+ FOREIGN KEY (Membro) REFERENCES Personale(Matricola) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE Scalo(
@@ -87,8 +90,8 @@ CREATE TABLE Scalo(
   Data_arrivo DATETIME,
   Data_partenza DATETIME,
   PRIMARY KEY (Nave,Numero_viaggio,ETA),
-  FOREIGN KEY (Numero_viaggio,Nave) REFERENCES Viaggi(Numero,Nave),
-  FOREIGN KEY (Porto) REFERENCES Porti(Nome)
+  FOREIGN KEY (Numero_viaggio,Nave) REFERENCES Viaggio(Numero,Nave) ON DELETE CASCADE,
+  FOREIGN KEY (Porto) REFERENCES Porto(Nome) ON DELETE RESTRICT
 );
 
 INSERT INTO Classe (Nome,Tipo,Cantiere_costruzione,Lunghezza,Larghezza,Altezza,Livello_facilities,Velocita_crociera,Velocita_max,Equipaggio_max) VALUES
@@ -427,3 +430,288 @@ INSERT INTO Scalo (ETA,Nave,Numero_viaggio,Operazione,Porto,Data_arrivo,Data_par
 ('2016-04-24 03:00','IMO5641147','41','Personale/Provviste','Port of Istanbul','2016-04-24 03:01','2016-04-24 06:15');
 
 SET FOREIGN_KEY_CHECKS=1;
+
+
+
+DROP TRIGGER IF EXISTS comp_viaggi;
+DELIMITER //
+CREATE TRIGGER comp_viaggi AFTER INSERT ON Viaggio
+FOR EACH ROW
+BEGIN
+DECLARE comp VARCHAR(13);
+DECLARE valid INT(1);
+SELECT compatibilita(NEW.Nave,NEW.Porto_partenza) INTO comp;
+IF comp = "compatibile" THEN
+    SELECT compatibilita(NEW.Nave,NEW.Porto_destinazione) INTO comp;
+    IF comp = "compatibile" THEN SET valid = 1;
+    ELSE SET valid = 0;
+    END IF;
+ELSE SET valid = 0;
+END IF;
+IF valid = 0 THEN
+SIGNAL SQLSTATE VALUE '45000'
+SET MESSAGE_TEXT = "INCOMPATIBILITA' PORTI Partenza/Destinazione con la classe";
+END IF;
+END//
+DELIMITER ;
+
+
+
+DROP TRIGGER IF EXISTS num_viaggio;
+DELIMITER //
+CREATE TRIGGER num_viaggio BEFORE INSERT ON Viaggio
+FOR EACH ROW
+BEGIN
+DECLARE num INT(10);
+SELECT MAX(Numero) INTO num FROM Viaggo WHERE Nave = NEW.Nave AND Numero != NEW.Numero;
+IF NEW.Numero > num+1 THEN
+    SET NEW.Numero = num+1;
+    SIGNAL SQLSTATE '01000'
+    SET MESSAGE_TEXT = "ATTENZIONE: Numero viaggio e' stato coretto", MYSQL_ERRNO = '1000';
+END IF;
+END//
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS controlloQualificagrado;
+DELIMITER //
+CREATE TRIGGER controlloQualificagrado AFTER INSERT ON Personale
+FOR EACH ROW
+BEGIN
+
+DECLARE msg VARCHAR(128);
+SET msg = 'Inserito valore per Grado non coerente con Qualifica.';
+
+IF NEW.Qualifica = 'Cuoco' and NEW.Grado != 'Cuoco' or NEW.Qualifica =  'Cuoco' and NEW.Grado != 'Aiuto Cuoco'
+THEN
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = msg;
+
+ELSEIF NEW.Qualifica = 'Marinaio' and NEW.Grado != 'Mozzo' or NEW.Qualifica = 'Marinaio' and NEW.Grado != 'Marinaio Scelto'
+THEN
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = msg;
+
+ELSEIF NEW.Qualifica = 'Tecnico' and NEW.Grado != 'Operaio' or NEW.Qualifica = 'Tecnico' and NEW.Grado != 'Elettricista'
+THEN
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = msg;
+
+ELSEIF NEW.Qualifica = 'Ufficiale' and NEW.Grado != 'Secondo di Macchina'
+or NEW.Qualifica = 'Ufficiale' and NEW.Grado != 'Secondo di coperta'
+or NEW.Qualifica = 'Ufficiale' and NEW.Grado != 'Comandante'
+or NEW.Qualifica = 'Ufficiale' and NEW.Grado != 'Capo Macchinista'
+or NEW.Qualifica = 'Ufficiale' and NEW.Grado != 'Primo di coperta'
+or NEW.Qualifica = 'Ufficiale' and NEW.Grado != 'Primo di Macchina'
+or NEW.Qualifica = 'Ufficiale' and NEW.Grado != 'Allievo di Macchina'
+or NEW.Qualifica = 'Ufficiale' and NEW.Grado != 'Allievo di Coperta'
+THEN
+SIGNAL SQLSTATE '45000'
+SET MESSAGE_TEXT = msg;
+
+END IF;
+
+END//
+DELIMITER ;
+
+
+
+DROP FUNCTION IF EXISTS maxViaggi;
+DELIMITER //
+CREATE FUNCTION	maxViaggi(inizio DATE, fine DATE)
+RETURNS CHAR(10)
+BEGIN
+DECLARE num INT;
+DECLARE nav CHAR(10);
+SELECT Nave INTO nav
+FROM (SELECT Nave, count(*) cont FROM Viaggio WHERE Inizio_viaggio >= inizio AND Fine_viaggio <= fine GROUP BY Nave) AS cv
+JOIN Nave ON (cv.Nave = IMO_number)
+WHERE cont = (SELECT max(cont)
+FROM (SELECT Nave, count(*) cont
+      FROM Viaggio WHERE Inizio_viaggio >= inizio AND Fine_viaggio <= fine
+      GROUP BY Nave) AS cv)
+ORDER BY Data_costruzione
+LIMIT 1;
+RETURN nav;
+END//
+DELIMITER ;
+
+
+
+DELIMITER //
+CREATE FUNCTION compatibilita(nave CHAR(10),port VARCHAR(50))
+RETURNS VARCHAR(13)
+BEGIN
+DECLARE comp VARCHAR(13);
+DECLARE class VARCHAR(50);
+DECLARE lvlFaci INT(1);
+DECLARE lvlPort INT(1);
+SELECT Classe INTO class FROM Nave WHERE IMO_number = nave;
+SELECT Livello_facilities INTO lvlFaci FROM Classe WHERE Nome = class;
+SELECT Livello_facilities INTO lvlPort FROM Porto WHERE Nome = port;
+IF lvlFaci <= lvlPort THEN SET comp = "compatibile";
+ELSE SET comp = "incompatibile";
+END IF;
+RETURN comp;
+END//
+DELIMITER ;
+
+
+
+DROP FUNCTION IF EXISTS anzianitaMembro;
+DELIMITER //
+CREATE FUNCTION anzianitaMembro(matricola CHAR(7))
+RETURNS INT
+
+BEGIN
+DECLARE sommaDate INT;
+DECLARE differenzaDate INT;
+SET differenzaDate = 0;
+
+  SELECT SUM(DATEDIFF(Data_sbarco,Data_imbarco)) INTO sommaDate
+  FROM Equipaggio
+  WHERE Membro = matricola
+    AND Data_sbarco IS NOT NULL;
+
+  SELECT DATEDIFF(CURDATE(),Data_imbarco) INTO differenzaDate FROM Equipaggio WHERE Membro = matricola AND Data_sbarco IS NULL;
+  SET sommaDate = sommaDate + differenzaDate;
+
+
+RETURN sommaDate;
+END//
+DELIMITER ;
+
+
+
+DROP PROCEDURE IF EXISTS livelloFacility;
+
+DELIMITER //
+
+CREATE PROCEDURE livelloFacility(nomeporto VARCHAR(50))
+BEGIN
+SELECT p.Nome, f.Nome, f.Livello
+FROM Porto p, Facility f
+WHERE p.Nome = nomeporto AND f.Livello <= p.Livello_facilities
+ORDER BY f.Livello;
+END//
+
+DELIMITER ;
+
+/* Query per trovare il personale sbarcato in uno scalo x e il personale imbarcato al suo posto */
+CREATE OR REPLACE VIEW Sostituzioni AS
+SELECT K.Nave,K.MatricolaS,K.NomeS,K.CognomeS,K.Qualifica,K.Grado,K.MatricolaI,K.NomeI,K.CognomeI,ETA,No_Viag,Operazione,Porto FROM(
+SELECT P_sbar.Nave as Nave, P_sbar.Matricola as MatricolaS, P_sbar.Nome as NomeS, P_sbar.Cognome as CognomeS,
+       P_imb.Matricola AS MatricolaI, P_imb.Nome AS NomeI, P_imb.Cognome AS CognomeI, P_imb.Qualifica, P_imb.Grado
+FROM (SELECT *
+      FROM Personale JOIN Equipaggio ON Matricola = Membro
+      WHERE Data_sbarco = "2016-02-22" AND Nave = "IMO5641147") as P_sbar
+JOIN (SELECT *
+      FROM Personale JOIN Equipaggio ON Matricola = Membro
+      WHERE Data_imbarco = "2016-02-22" AND Nave = "IMO5641147") as P_imb
+WHERE P_sbar.Qualifica = P_imb.Qualifica
+  AND P_sbar.Grado = P_imb.Grado) AS K
+  JOIN (SELECT Nave, CAST(ETA AS DATE) AS ETA, Numero_viaggio AS No_Viag, Operazione, Porto, CAST(Data_arrivo AS DATE) AS Data_arr,
+        CAST(Data_partenza AS DATE) AS Data_part FROM Scalo) AS S
+  WHERE S.Nave = K.Nave
+  AND S.Data_arr = "2016-02-22";
+
+
+
+CREATE OR REPLACE VIEW ComUltimaManutenzione AS
+SELECT P.Nave,Matricola,Nome,Cognome,Grado,Data_imbarco,Data_sbarco,Viaggio,Data_arrivo,Porto
+FROM (SELECT Nave,Matricola,Nome,Cognome,Grado,Data_imbarco,Data_sbarco
+        FROM Equipaggio JOIN Personale ON Membro = Matricola) AS P
+  JOIN (SELECT Nave,Numero_viaggio AS Viaggio,CAST(Data_arrivo AS DATE)AS Data_arrivo,Porto
+        FROM Scalo WHERE Operazione LIKE "%Manutenzione%" ORDER BY Data_arrivo DESC LIMIT 1) AS Sc
+WHERE P.Nave = Sc.Nave
+  AND Data_imbarco < Data_arrivo
+  AND Data_sbarco > Data_arrivo
+  AND Grado = "Comandante"
+  OR P.Nave = Sc.Nave
+  AND Data_imbarco < Data_arrivo
+  AND Data_sbarco IS NULL
+  AND Grado = "Comandante";
+
+
+
+DROP PROCEDURE IF EXISTS membroDaSbarcare;
+DELIMITER //
+CREATE PROCEDURE membroDaSbarcare(qual VARCHAR(20), gr VARCHAR(30))
+BEGIN
+	SELECT Matricola, Nome, Cognome
+	FROM (SELECT * FROM Personale JOIN Equipaggio ON Matricola = Membro) AS x
+	WHERE x.Matricola NOT IN (SELECT Membro FROM Equipaggio WHERE Data_sbarco IS NULL)
+	AND Qualifica = qual
+	AND Grado = gr
+	AND Data_sbarco = (SELECT MIN(Data_sbarco)
+	FROM (SELECT * FROM Personale JOIN Equipaggio ON Matricola = Membro) AS x
+	WHERE x.Matricola NOT IN (SELECT Membro FROM Equipaggio WHERE Data_sbarco IS NULL)
+	AND Qualifica = qual
+	AND Grado = gr);
+END//
+DELIMITER ;
+
+
+
+CREATE OR REPLACE VIEW OperazioniPortualiCorrenti AS
+SELECT n.IMO_number, n.Nome AS Nome_nave,Numero AS Numero_viaggio, Tipo_carico, Porto_destinazione AS Porto, Matricola_cpt,
+       Cognome_cpt, Nome_cpt, Matricola_fmt, Cognome_fmt, Nome_fmt
+FROM Nave n,
+     (SELECT cpt.Nave, cpt.Matricola AS Matricola_cpt, cpt.Cognome AS Cognome_cpt,
+      cpt.Nome AS Nome_cpt, fmt.Matricola AS Matricola_fmt, fmt.Cognome AS Cognome_fmt,
+      fmt.Nome AS Nome_fmt
+      FROM (SELECT * FROM Equipaggio JOIN Personale ON Membro = Matricola) AS cpt,
+           (SELECT * FROM Equipaggio JOIN Personale ON Membro = Matricola) AS fmt
+      WHERE cpt.Grado = "Comandante"
+	    AND fmt.Grado = "Primo di coperta"
+	    AND cpt.Data_sbarco IS NULL
+	    AND fmt.Data_sbarco IS NULL
+	    AND cpt.Nave = (SELECT IMO_number FROM Nave WHERE Stato_corrente LIKE "%port operations%")
+	    AND fmt.Nave = cpt.Nave) AS x,
+     Viaggio v
+WHERE n.IMO_number = x.Nave
+  AND v.Numero = (SELECT Numero
+                  FROM Viaggio
+                  WHERE Nave = (SELECT IMO_number FROM Nave WHERE Stato_corrente LIKE "%port operations%")
+                  ORDER BY Numero DESC LIMIT 1);
+
+
+
+DROP PROCEDURE IF EXISTS trovaEquipaggio;
+DELIMITER //
+CREATE PROCEDURE trovaEquipaggio(data DATE, nav CHAR(10))
+BEGIN
+SELECT *
+FROM Equipaggio JOIN Personale ON Membro = Matricola
+WHERE Nave = nav
+  AND Data_imbarco <= data
+  AND Data_sbarco >= data
+   OR Nave = nav
+  AND Data_imbarco <= data
+  AND Data_sbarco IS NULL;
+END//
+DELIMITER ;
+
+
+
+DROP PROCEDURE IF EXISTS numeroEquipaggio;
+DELIMITER //
+CREATE PROCEDURE numeroEquipaggio(data DATE, nav CHAR(10))
+BEGIN
+SELECT Nave, Numero_viaggio, Operazione, Porto, Data_arrivo AS Data, Numero_imbarcati, Equipaggio_max
+FROM (SELECT Equipaggio_max, IMO_number
+      FROM Classe JOIN Nave ON Classe.Nome = Nave.Classe) AS eqMax
+     JOIN Scalo ON eqMax.IMO_number = Nave
+     JOIN (SELECT COUNT(*) AS Numero_imbarcati
+           FROM Equipaggio JOIN (SELECT Nave AS NaveS, CAST(Data_arrivo AS DATE) AS Data_arrivo
+                                 FROM Scalo
+                                 WHERE CAST(Data_arrivo AS DATE) = data AND Nave = nav) AS scl
+           WHERE Nave = NaveS
+           AND Data_imbarco <= Data_arrivo
+           AND Data_sbarco >= Data_arrivo
+           OR Nave = NaveS
+           AND Data_imbarco <= Data_arrivo
+           AND Data_sbarco IS NULL) AS nImb
+WHERE CAST(Data_arrivo AS DATE) = data
+AND Nave = nav;
+END //
+DELIMITER ;
