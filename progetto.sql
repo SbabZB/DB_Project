@@ -1,5 +1,6 @@
 SET FOREIGN_KEY_CHECKS=0;
 
+DROP TABLE IF EXISTS Personale;
 CREATE TABLE Personale
 (
  Matricola CHAR(7),
@@ -7,17 +8,19 @@ CREATE TABLE Personale
  Cognome VARCHAR(30),
  Data_nascita DATE,
  Cittadinanza VARCHAR(20),
- Qualifica VARCHAR(20),
+ Qualifica ENUM('Cuoco','Marinaio','Tecnico','Ufficiale'),
  Grado VARCHAR(30),
  PRIMARY KEY (Matricola)
 );
 
+DROP TABLE IF EXISTS Facility;
 CREATE TABLE Facility(
   Nome varchar(50),
   Livello int(1),
   PRIMARY KEY (Nome)
 );
 
+DROP TABLE IF EXISTS Classe;
 CREATE TABLE Classe(
   Nome varchar(50),
   Tipo varchar(20),
@@ -32,6 +35,7 @@ CREATE TABLE Classe(
   PRIMARY KEY (Nome,Tipo,Cantiere_costruzione)
 );
 
+DROP TABLE IF EXISTS Nave;
 CREATE TABLE Nave
 (
   IMO_number char(10),
@@ -48,6 +52,7 @@ CREATE TABLE Nave
   FOREIGN KEY (Classe) REFERENCES Classe(Nome) ON DELETE SET NULL
 );
 
+DROP TABLE IF EXISTS Porto;
 CREATE TABLE Porto(
   Nome varchar(50),
   Livello_facilities int(1),
@@ -55,6 +60,7 @@ CREATE TABLE Porto(
   PRIMARY KEY (Nome)
 );
 
+DROP TABLE IF EXISTS Viaggio;
 CREATE TABLE Viaggio
 (
  Numero INT(10),
@@ -70,6 +76,7 @@ CREATE TABLE Viaggio
  FOREIGN KEY (Porto_destinazione) REFERENCES Porto(Nome) ON DELETE RESTRICT
 );
 
+DROP TABLE IF EXISTS Equipaggio;
 CREATE TABLE Equipaggio
 (
  Nave CHAR(10),
@@ -81,6 +88,7 @@ CREATE TABLE Equipaggio
  FOREIGN KEY (Membro) REFERENCES Personale(Matricola) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+DROP TABLE IF EXISTS Scalo;
 CREATE TABLE Scalo(
   ETA DATETIME,
   Nave char(10),
@@ -463,7 +471,7 @@ CREATE TRIGGER num_viaggio BEFORE INSERT ON Viaggio
 FOR EACH ROW
 BEGIN
 DECLARE num INT(10);
-SELECT MAX(Numero) INTO num FROM Viaggo WHERE Nave = NEW.Nave AND Numero != NEW.Numero;
+SELECT MAX(Numero) INTO num FROM Viaggio WHERE Nave = NEW.Nave AND Numero != NEW.Numero;
 IF NEW.Numero > num+1 THEN
     SET NEW.Numero = num+1;
     SIGNAL SQLSTATE '01000'
@@ -586,7 +594,7 @@ DROP PROCEDURE IF EXISTS livelloFacility;
 
 DELIMITER //
 
-CREATE PROCEDURE livelloFacility(nomeporto VARCHAR(50))
+CREATE PROCEDURE facilitiesPresenti(nomeporto VARCHAR(50))
 BEGIN
 SELECT p.Nome, f.Nome, f.Livello
 FROM Porto p, Facility f
@@ -596,11 +604,10 @@ END//
 
 DELIMITER ;
 
-/* Query per trovare il personale sbarcato in uno scalo x e il personale imbarcato al suo posto */
 CREATE OR REPLACE VIEW Sostituzioni AS
-SELECT K.Nave,K.MatricolaS,K.NomeS,K.CognomeS,K.Qualifica,K.Grado,K.MatricolaI,K.NomeI,K.CognomeI,ETA,No_Viag,Operazione,Porto FROM(
-SELECT P_sbar.Nave as Nave, P_sbar.Matricola as MatricolaS, P_sbar.Nome as NomeS, P_sbar.Cognome as CognomeS,
-       P_imb.Matricola AS MatricolaI, P_imb.Nome AS NomeI, P_imb.Cognome AS CognomeI, P_imb.Qualifica, P_imb.Grado
+SELECT K.Nave,K.MatricolaS,K.CognomeS,K.Qualifica,K.Grado,K.MatricolaI,K.CognomeI,ETA,No_Viag,Operazione,Porto FROM(
+SELECT P_sbar.Nave as Nave, P_sbar.Matricola as MatricolaS, P_sbar.Cognome as CognomeS,
+       P_imb.Matricola AS MatricolaI, P_imb.Cognome AS CognomeI, P_imb.Qualifica, P_imb.Grado
 FROM (SELECT *
       FROM Personale JOIN Equipaggio ON Matricola = Membro
       WHERE Data_sbarco = "2016-02-22" AND Nave = "IMO5641147") as P_sbar
@@ -653,7 +660,7 @@ DELIMITER ;
 
 
 CREATE OR REPLACE VIEW OperazioniPortualiCorrenti AS
-SELECT n.IMO_number, n.Nome AS Nome_nave,Numero AS Numero_viaggio, Tipo_carico, Porto_destinazione AS Porto, Matricola_cpt,
+SELECT n.IMO_number, Tipo_carico, Porto_destinazione AS Porto, Matricola_cpt,
        Cognome_cpt, Nome_cpt, Matricola_fmt, Cognome_fmt, Nome_fmt
 FROM Nave n,
      (SELECT cpt.Nave, cpt.Matricola AS Matricola_cpt, cpt.Cognome AS Cognome_cpt,
@@ -697,7 +704,7 @@ DROP PROCEDURE IF EXISTS numeroEquipaggio;
 DELIMITER //
 CREATE PROCEDURE numeroEquipaggio(data DATE, nav CHAR(10))
 BEGIN
-SELECT Nave, Numero_viaggio, Operazione, Porto, Data_arrivo AS Data, Numero_imbarcati, Equipaggio_max
+SELECT Nave, Numero_viaggio, Operazione, Porto, Numero_imbarcati, Equipaggio_max
 FROM (SELECT Equipaggio_max, IMO_number
       FROM Classe JOIN Nave ON Classe.Nome = Nave.Classe) AS eqMax
      JOIN Scalo ON eqMax.IMO_number = Nave
@@ -715,3 +722,4 @@ WHERE CAST(Data_arrivo AS DATE) = data
 AND Nave = nav;
 END //
 DELIMITER ;
+
