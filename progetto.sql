@@ -624,7 +624,7 @@ WHERE P_sbar.Qualifica = P_imb.Qualifica
 
 
 CREATE OR REPLACE VIEW ComUltimaManutenzione AS
-SELECT P.Nave,Matricola,Nome,Cognome,Grado,Data_imbarco,Data_sbarco,Viaggio,Data_arrivo,Porto
+SELECT P.Nave,Matricola,Nome,Cognome,Data_imbarco,Data_sbarco,Viaggio,Data_arrivo,Porto
 FROM (SELECT Nave,Matricola,Nome,Cognome,Grado,Data_imbarco,Data_sbarco
         FROM Equipaggio JOIN Personale ON Membro = Matricola) AS P
   JOIN (SELECT Nave,Numero_viaggio AS Viaggio,CAST(Data_arrivo AS DATE)AS Data_arrivo,Porto
